@@ -1,42 +1,51 @@
 # Enterprise Data Integration Platform
 
-Reusable ingestion and transformation components for integrating APIs, databases,
-files, and external data sources into governed analytical datasets.
+Reusable ingestion and transformation components for integrating APIs,
+databases, files, and external data sources into governed analytical datasets,
+with validation, reconciliation, monitoring, and recovery patterns.
 
-The platform is intended to provide consistent validation, reconciliation,
-monitoring, and recovery patterns across data pipelines. This repository is
-currently an **early scaffold**: the package modules are placeholders, and the
-pipeline behavior described below is the project direction rather than
-implemented functionality. It is not production-ready.
+## Project overview
+
+This project is designed to provide a consistent foundation for moving data from
+operational and external sources into trusted analytical datasets. Its intended
+pipeline pattern separates extraction, transformation, validation, and loading,
+so components can be reused across integrations and failures can be diagnosed
+and recovered without hiding data-quality issues.
+
+The platform is intended to complement downstream analytics and data-quality
+workflows: integrations publish governed datasets, and consuming systems can
+build reporting, segmentation, and predictive workloads from them.
+
+> **Development status:** This repository is currently an early scaffold. The
+> Python package modules and tests are empty; connectors, transformations,
+> validation, reconciliation, monitoring, recovery, and loading are not yet
+> implemented. The capabilities in this README describe the project direction,
+> not production-ready or completed features.
 
 ## Goals
 
-- Make it straightforward to add data from multiple source types.
-- Separate extraction, transformation, and loading so pipeline steps can be
-  reused and tested independently.
-- Validate data before it is published to downstream analytical systems.
-- Make data quality and reconciliation results observable.
-- Detect anomalies, alert on failures, and track pipeline service-level agreements (SLAs).
-- Support safe retries and recovery from transient pipeline failures.
+- Integrate APIs, relational databases, files, and other external data sources
+  behind reusable components.
+- Keep extraction, transformation, validation, and loading independently
+  configurable and testable.
+- Publish governed analytical datasets only after configured quality checks
+  succeed.
+- Reconcile records across pipeline stages and report actionable differences.
+- Make pipeline freshness, quality outcomes, and failures observable.
+- Provide explicit retry and recovery patterns for transient failures.
 
-## Intended capabilities
+## Proposed pipeline capabilities
 
-| Area | Direction |
+| Stage | Intended responsibility |
 | --- | --- |
-| Sources | HTTP APIs, relational databases, files, and other external systems |
-| Extraction | Reusable clients and extraction routines with explicit configuration |
-| Transformation | Composable transformations for cleaning, mapping, and normalizing data |
-| Data quality | Automated schema validation and completeness checks before loading |
-| Freshness | Monitor data arrival and processing freshness against configured expectations |
-| Reconciliation | Compare extracted, transformed, and loaded records and report differences |
-| Anomaly detection | Identify unexpected changes in data quality, volume, or pipeline behavior |
-| Loading | Publish validated datasets to analytical destinations |
-| Observability | Failure alerting, pipeline health monitoring, and SLA tracking |
-| Recovery | Actionable errors, safe retries, and recovery patterns |
-
-These are design goals, not claims that the current scaffold already implements
-each capability. In particular, automated checks, anomaly detection, alerting,
-and SLA monitoring are not implemented yet.
+| Source connectors | Read from HTTP APIs, relational databases, files, and external systems using explicit configuration |
+| Extraction | Retrieve source data consistently and preserve enough context for traceability |
+| Transformation | Clean, map, and normalize data with composable, deterministic steps |
+| Validation | Check schemas, required fields, completeness, and configured quality rules before publication |
+| Reconciliation | Compare records or aggregates across extraction, transformation, and loading |
+| Loading | Publish validated datasets to configured analytical destinations |
+| Monitoring | Surface pipeline runs, quality results, freshness, and failures |
+| Recovery | Make failure behavior, safe retries, and recovery decisions explicit |
 
 ## Repository layout
 
@@ -44,16 +53,40 @@ and SLA monitoring are not implemented yet.
 .
 ├── src/
 │   └── ingestion/
-│       ├── api_client.py   # API client module (scaffold)
-│       ├── extract.py      # Extraction module (scaffold)
-│       ├── transform.py    # Transformation module (scaffold)
-│       └── load.py         # Loading module (scaffold)
-├── tests/                  # Test package (no pipeline tests yet)
+│       ├── api_client.py   # API client scaffold
+│       ├── extract.py      # Extraction scaffold
+│       ├── transform.py    # Transformation scaffold
+│       └── load.py         # Loading scaffold
+├── tests/                  # Empty test package
 ├── config/                 # Reserved for pipeline configuration
-├── data/                   # Reserved for local sample data
-├── docs/                   # Reserved for design and usage documentation
-├── pyproject.toml          # Package metadata and development tools
-└── requirements.txt        # Reserved; project dependencies are in pyproject.toml
+├── data/                   # Reserved for sample data
+├── docs/                   # Reserved for architecture and usage documentation
+├── pyproject.toml          # Package metadata and development dependencies
+└── requirements.txt        # Empty; dependencies are declared in pyproject.toml
+```
+
+## Intended data flow
+
+```text
+APIs / databases / files / external systems
+                    |
+                    v
+          Source-specific extraction
+                    |
+                    v
+        Reusable transformation steps
+                    |
+                    v
+       Schema and quality validation
+                    |
+                    v
+     Reconciliation and run monitoring
+                    |
+                    v
+      Governed analytical destinations
+                    |
+                    v
+       Retry / recovery on failure
 ```
 
 ## Technology
@@ -91,21 +124,35 @@ ruff check src tests
 ```
 
 The current repository does not yet include runnable pipeline examples or
-behavioral tests; those will be added as the ingestion components are
-implemented.
+behavioral tests. Installing the project makes its declared Python dependencies
+available, but there are no implemented ingestion commands or workflows to run
+yet.
 
 ## Development status
 
-The repository currently contains package metadata and empty module/test
-scaffolding. No API, database, or file ingestion flow—or data-quality and
-observability checks—is implemented yet. Before using this project for real
-data, implement and test the relevant source connectors, transformation and
-validation rules, destination loading, and operational safeguards.
+The repository contains Python package metadata and empty module/test
+scaffolding. No API, database, or file ingestion flow, transformation,
+validation, reconciliation, loading, or operational monitoring is implemented.
+Before using this project for real data, implement and test the relevant
+connectors and pipeline stages, define source and destination contracts, and
+establish the security, observability, and recovery controls required by the
+deployment environment.
+
+## Suggested implementation sequence
+
+1. Define typed pipeline configuration, source/destination contracts, and
+   structured run results.
+2. Implement and test file extraction, transformations, and a local destination
+   for a small end-to-end example.
+3. Add API and database connectors with explicit timeouts, pagination, and
+   credential handling.
+4. Add schema/completeness checks and record-level or aggregate reconciliation.
+5. Add production destination adapters, monitoring, safe retries, and documented
+   recovery behavior.
 
 ## Contribution direction
 
-When extending the project, prefer small composable pipeline steps, explicit
-configuration, deterministic transformations, and tests for success and failure
-paths. Keep credentials and sensitive data out of source control; provide
-environment-based configuration and safe example values when connectors are
-implemented.
+When extending the project, prefer composable pipeline stages, explicit
+configuration, deterministic transformations, and tests for success, failure,
+and recovery paths. Keep credentials and sensitive data out of source control;
+use environment-based configuration and synthetic sample data.
