@@ -16,6 +16,7 @@ implemented functionality. It is not production-ready.
   reused and tested independently.
 - Validate data before it is published to downstream analytical systems.
 - Make data quality and reconciliation results observable.
+- Detect anomalies, alert on failures, and track pipeline service-level agreements (SLAs).
 - Support safe retries and recovery from transient pipeline failures.
 
 ## Intended capabilities
@@ -25,13 +26,17 @@ implemented functionality. It is not production-ready.
 | Sources | HTTP APIs, relational databases, files, and other external systems |
 | Extraction | Reusable clients and extraction routines with explicit configuration |
 | Transformation | Composable transformations for cleaning, mapping, and normalizing data |
-| Validation | Schema and data-quality checks before loading |
+| Data quality | Automated schema validation and completeness checks before loading |
+| Freshness | Monitor data arrival and processing freshness against configured expectations |
 | Reconciliation | Compare extracted, transformed, and loaded records and report differences |
+| Anomaly detection | Identify unexpected changes in data quality, volume, or pipeline behavior |
 | Loading | Publish validated datasets to analytical destinations |
-| Operations | Monitoring, actionable errors, retry, and recovery patterns |
+| Observability | Failure alerting, pipeline health monitoring, and SLA tracking |
+| Recovery | Actionable errors, safe retries, and recovery patterns |
 
 These are design goals, not claims that the current scaffold already implements
-each capability.
+each capability. In particular, automated checks, anomaly detection, alerting,
+and SLA monitoring are not implemented yet.
 
 ## Repository layout
 
@@ -92,10 +97,10 @@ implemented.
 ## Development status
 
 The repository currently contains package metadata and empty module/test
-scaffolding. No API, database, or file ingestion flow is implemented yet. Before
-using this project for real data, implement and test the relevant source
-connectors, transformation and validation rules, destination loading, and
-operational safeguards.
+scaffolding. No API, database, or file ingestion flow—or data-quality and
+observability checks—is implemented yet. Before using this project for real
+data, implement and test the relevant source connectors, transformation and
+validation rules, destination loading, and operational safeguards.
 
 ## Contribution direction
 
